@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+set -ue
+
+export MAVEN_OPTS="$($(dirname "$0")/maven_opts)"
+maven_goal=${MAVEN_GOAL:-package}
+if [ -x ./mvnw ]; then alias mvn=${PWD}/mvnw; fi
+
+(
+  if [ "${MAVEN_PROJECT_BASEDIR:-.}" != "." ]; then cd ${MAVEN_PROJECT_BASEDIR}; fi
+  mvn -T1C -q --batch-mode -DskipTests "${maven_goal}" "$@"
+)

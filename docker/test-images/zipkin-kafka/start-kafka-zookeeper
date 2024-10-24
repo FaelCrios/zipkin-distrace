@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# ENTRYPOINT script that starts ZooKeeper and then Kafka
+#
+# This intentionally locates config using the current working directory, in order to consolidate
+# Dockerfile instructions to WORKDIR
+set -eu
+
+# Apply one-time deferred configuration that relies on ENV variables
+#
+# Internal docker producers and consumers use the normal hostname:9092, and outside docker the advertised host on port 19092
+ADVERTISED_LISTENERS="advertised.listeners=PLAINTEXT://${HOSTNAME}:9092,PLAINTEXT_HOST://${KAFKA_ADVERTISED_HOST_NAME}:19092"
+KAFKA_CONFIG=./config/server.properties
+grep -qF -- "$ADVERTISED_LISTENERS" $KAFKA_CONFIG || echo "$ADVERTISED_LISTENERS" >> $KAFKA_CONFIG
+
+# Replace the logging level
+sed -i "s/log4j.rootLogger.*/log4j.rootLogger=${LOGGING_LEVEL}, stdout/" config/log4j.properties
+
+echo Starting ZooKeeper
+# -cp 'classes:lib/*' allows layers to patch the image without packaging or overwriting jars
+exec java -cp 'classes:lib/*' ${ZOOKEEPER_JAVA_OPTS} \
+  -Djava.io.tmpdir=/tmp \
+  -Dzookeeper.jmx.log4j.disable=true \
+  -Dlog4j.configuration=file:./config/log4j.properties \
+  org.apache.zookeeper.server.quorum.QuorumPeerMain ./config/zookeeper.properties &
+
+# Wait for ZooKeeper to be ok
+until echo ruok | nc 127.0.0.1 2181 > /dev/null; do sleep 1; done
+
+# Configure the Docker HEALTHCHECK
+export HEALTHCHECK_PORT=9092
+export HEALTHCHECK_KIND=tcp
+
+echo Starting Kafka
+exec bin/kafka-run-class.sh kafka.Kafka ./config/server.properties "$@"

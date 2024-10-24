@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright The OpenZipkin Authors
+    SPDX-License-Identifier: Apache-2.0
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.zipkin.zipkin2</groupId>
+    <artifactId>zipkin-storage-parent</artifactId>
+    <version>3.4.2-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>zipkin-storage-cassandra</artifactId>
+  <name>Storage: Cassandra</name>
+
+  <properties>
+    <main.basedir>${project.basedir}/../..</main.basedir>
+
+    <!-- CheckReturnValue:OFF as it is used on some types that do not require it
+         https://groups.google.com/a/lists.datastax.com/g/java-driver-user/c/YbXjSoNV6Ns/m/U9w-HccWBgAJ -->
+    <!-- AutoValueImmutableFields:OFF because error-prone wants InsertSpan to depend on guava! -->
+    <errorprone.args>-Xep:CheckReturnValue:OFF -Xep:AutoValueImmutableFields:OFF</errorprone.args>
+  </properties>
+
+  <!-- Apache Cassandra java-driver is typically behind on jackson and netty -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>${netty.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value-annotations</artifactId>
+      <version>${auto-value.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value</artifactId>
+      <version>${auto-value.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>java-driver-core</artifactId>
+      <version>${java-driver.version}</version>
+      <exclusions>
+        <!-- Exclude unused graph and geo dependencies -->
+        <exclusion>
+          <groupId>com.esri.geometry</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <!-- temporary until https://github.com/apache/cassandra-java-driver/pull/1904 -->
+        <exclusion>
+          <groupId>com.github.jnr</groupId>
+          <artifactId>jnr-posix</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.tinkerpop</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <!-- We retain reactivestreams even though we don't use it because
+             Mockito dies trying to mock CqlSession without it. -->
+      </exclusions>
+    </dependency>
+
+    <!-- Set SLF4J version to what's used by the server, without excluding the version
+         of cassandra, which is used in the zipkin-dependencies spark job. -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- temporary until https://github.com/apache/cassandra-java-driver/pull/1904 -->
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-posix</artifactId>
+      <version>3.1.19</version>
+    </dependency>
+  </dependencies>
+</project>

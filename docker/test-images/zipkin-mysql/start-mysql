@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# ENTRYPOINT script that starts MySQL
+#
+# This intentionally locates config using the current working directory, in order to consolidate
+# Dockerfile instructions to WORKDIR
+set -eu
+
+# Configure the Docker HEALTHCHECK
+export HEALTHCHECK_PORT=3306
+export HEALTHCHECK_KIND=tcp
+
+echo Starting MySQL
+MYSQL_OPTS="--user=mysql --basedir=${PWD} --datadir=${PWD}/data --tmpdir=/tmp"
+exec mysqld_safe ${MYSQL_OPTS}

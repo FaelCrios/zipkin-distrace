@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# ENTRYPOINT script that starts Elasticsearch
+#
+# This intentionally locates config using the current working directory, in order to consolidate
+# Dockerfile instructions to WORKDIR
+set -eu
+
+# Configure the Docker HEALTHCHECK
+export HEALTHCHECK_PORT=9200
+export HEALTHCHECK_PATH=/_cluster/health
+
+# This loads the ES launcher because configuration of the actual process is
+# in binary and not documented for external use.
+# See https://github.com/elastic/elasticsearch/blob/v8.11.3/server/src/main/java/org/elasticsearch/bootstrap/ServerArgs.java#L57
+#
+# Notably, this means that just like the default image, the ES daemon is not
+# pid 1
+exec java -cp 'lib/*:lib/cli-launcher/*' -XX:+UseSerialGC \
+  -Dcli.name=server \
+  -Dcli.script=$PWD/bin/elasticsearch \
+  -Dcli.libs=lib/tools/server-cli \
+  -Des.path.home=$PWD \
+  -Des.path.conf=$PWD/config \
+  -Des.distribution.type=docker \
+  org.elasticsearch.launcher.CliToolLauncher

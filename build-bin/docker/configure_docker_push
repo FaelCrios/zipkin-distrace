@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Ensures Docker is logged in and it can build multi-architecture.
+# This should be used instead of `configure_docker` when a push will occur.
+#
+# This should only happen when we are publishing multi-arch builds, as otherwise the setup could use
+# Docker Hub pull quota and possibly cause a build outage.
+
+set -ue
+
+# Verify we are on an arch that can publish multi-arch images
+arch=$($(dirname "$0")/docker_arch)
+if [ "${arch}" != "amd64" ]; then
+  >&2 echo "multiarch/qemu-user-static doesn't support arch ${arch}"
+  exit 1
+fi
+
+# Enable experimental features on the server (multi-arch)
+echo '{ "experimental":true, "registry-mirrors": ["https://mirror.gcr.io"] }' | sudo tee /etc/docker/daemon.json
+
+sudo service docker restart
+# Enable experimental client features (multi-arch)
+mkdir -p ${HOME}/.docker && echo '{"experimental":"enabled"}' > ${HOME}/.docker/config.json
+
+# Log in to GitHub Container Registry and Docker Hub for releasing images
+# This effects ${HOME}/.docker/config.json, which was created above
+
+# All images push to ghcr.io
+echo "${GH_TOKEN}" | docker login ghcr.io -u "${GH_USER}" --password-stdin
+
+# Some images push to docker.io: check first if credentials exist or not.
+if [ -n "${DOCKERHUB_USER:-}" ]; then
+  echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
+fi
+
+# Enable execution of different multi-architecture containers by QEMU and binfmt_misc
+# See https://github.com/multiarch/qemu-user-static
+#
+# Mirrored image use to avoid docker.io pulls:
+# docker tag multiarch/qemu-user-static:7.2.0-1 ghcr.io/openzipkin/multiarch-qemu-user-static:latest
+#
+# Note: This image only works on x86_64/amd64 architecture.
+# See: https://github.com/multiarch/qemu-user-static#supported-host-architectures
+docker run --rm --privileged ghcr.io/openzipkin/multiarch-qemu-user-static --reset -p yes

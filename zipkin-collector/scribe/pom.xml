@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright The OpenZipkin Authors
+    SPDX-License-Identifier: Apache-2.0
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.zipkin.zipkin2</groupId>
+    <artifactId>zipkin-collector-parent</artifactId>
+    <version>3.4.2-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>zipkin-collector-scribe</artifactId>
+  <name>Collector: Scribe (Legacy)</name>
+
+  <properties>
+    <main.basedir>${project.basedir}/../..</main.basedir>
+
+    <!-- error-prone doesn't like generated code -->
+    <errorprone.args>-XepDisableWarningsInGeneratedCode</errorprone.args>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>zipkin-collector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.linecorp.armeria</groupId>
+      <artifactId>armeria-thrift0.18</artifactId>
+      <version>${armeria.version}</version>
+    </dependency>
+
+    <!-- for Generated annotations on Scribe types -->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>${javax-annotation-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.linecorp.armeria</groupId>
+      <artifactId>armeria-junit5</artifactId>
+      <version>${armeria.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>${awaitility.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

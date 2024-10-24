@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# ENTRYPOINT script that starts Eureka
+set -eu
+
+exec java -cp 'classes:lib/*' ${JAVA_OPTS} zipkin.test.EurekaServer "$@"

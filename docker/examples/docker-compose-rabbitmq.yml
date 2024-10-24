@@ -1,0 +1,31 @@
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# This file uses the version 2 docker compose file format, described here:
+# https://docs.docker.com/compose/compose-file/#version-2
+#
+# It extends the default configuration from docker-compose.yml to add a test
+# rabbitmq server, which is used as a span transport.
+
+version: '2.4'
+
+services:
+  rabbitmq:
+    image: ghcr.io/openzipkin/zipkin-rabbitmq:${TAG:-latest}
+    container_name: rabbitmq
+    ports:  # expose the rabbitmq port so apps can publish spans.
+      - "5672:5672"
+
+  zipkin:
+    extends:
+      file: docker-compose.yml
+      service: zipkin
+    # slim doesn't include RabbitMQ support, so switch to the larger image
+    image: ghcr.io/openzipkin/zipkin:${TAG:-latest}
+    environment:
+      - RABBIT_ADDRESSES=rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy

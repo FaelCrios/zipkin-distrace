@@ -1,0 +1,36 @@
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Add configuration to disable as much server caching as possible. Note that
+# not all configuration here are defined by netflix/eureka, rather some are
+# specific to spring-cloud/spring-cloud-netflix.
+eureka:
+  client:
+    registerWithEureka: false
+    fetchRegistry: false  # in netflix/eureka this is shouldFetchRegistry
+    registryFetchIntervalSeconds: 1
+  server:
+    useReadOnlyResponseCache: false
+    # We could set myUrl to avoid this server thinking it is also an
+    # unavailable replica. However, the effect of doing so is worse.
+    # See https://github.com/spring-cloud/spring-cloud-netflix/issues/4251
+server:
+  port: 8761
+spring:
+  jmx:
+    # reduce startup time by excluding unexposed JMX service
+    enabled: false
+  main:
+    banner-mode: "off"
+  profiles:
+    active: "default"
+logging:
+  level:
+    # reduce chattiness
+    root: 'WARN'
+    # hush initialization warnings from BeanPostProcessorChecker
+    org.springframework.context.support: 'OFF'
+    # show startup completion
+    zipkin.test.EurekaServer: 'INFO'

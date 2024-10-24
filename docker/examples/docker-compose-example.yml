@@ -1,0 +1,30 @@
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Format version 2.1 was introduced with Docker Compose v1.9
+# We need Docker Compose v1.9+ for unset variable interpolation
+version: "2.1"
+
+services:
+  # Generate traffic by hitting http://localhost:8081
+  frontend:
+    container_name: frontend
+    image: ghcr.io/openzipkin/brave-example:${PROJECT:-armeria}
+    entrypoint: start-frontend
+    ports:
+      - 8081:8081
+    depends_on:
+      backend:
+        condition: service_healthy
+      zipkin:
+        condition: service_started
+  # Serves the /api endpoint the frontend uses
+  backend:
+    container_name: backend
+    image: ghcr.io/openzipkin/brave-example:${PROJECT:-armeria}
+    entrypoint: start-backend
+    depends_on:
+      zipkin:
+        condition: service_started

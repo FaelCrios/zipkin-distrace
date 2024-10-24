@@ -1,0 +1,57 @@
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# This file uses the version 2 docker compose file format, described here:
+# https://docs.docker.com/compose/compose-file/#version-2
+#
+# It extends the default configuration from docker-compose.yml to run the
+# zipkin-cassandra container instead of the zipkin-mysql container.
+
+version: '2.4'
+
+services:
+  storage:
+    image: ghcr.io/openzipkin/zipkin-cassandra:${TAG:-latest}
+    # Uncomment to use DSE instead (minimum version 5.1)
+    # image: datastax/dse-server:5.1.20
+    # environment:
+    #  - DS_LICENSE=accept
+    container_name: cassandra
+    # Uncomment to expose the storage port for testing
+    # ports:
+    #   - 9042:9042
+
+  # Use Cassandra instead of in-memory storage
+  zipkin:
+    extends:
+      file: docker-compose.yml
+      service: zipkin
+    # slim doesn't include Cassandra support, so switch to the larger image
+    image: ghcr.io/openzipkin/zipkin:${TAG:-latest}
+    environment:
+      - STORAGE_TYPE=cassandra3
+      # When using the test docker image, or have schema pre-installed, you don't need to ensure it
+      - CASSANDRA_ENSURE_SCHEMA=false
+      # When overriding this value, note the minimum supported version is 3.11.3
+      - CASSANDRA_CONTACT_POINTS=cassandra
+      # Uncomment to configure authentication
+      # - CASSANDRA_USERNAME=cassandra
+      # - CASSANDRA_PASSWORD=cassandra
+    # Uncomment to enable request logging (TRACE shows query values)
+    # command: --logging.level.com.datastax.oss.driver.internal.core.tracker.RequestLogger=TRACE
+    depends_on:
+      storage:
+        condition: service_healthy
+
+  dependencies:
+    extends:
+      file: docker-compose-dependencies.yml
+      service: dependencies
+    environment:
+      - STORAGE_TYPE=${STORAGE_TYPE:-cassandra3}
+      - CASSANDRA_CONTACT_POINTS=cassandra
+    depends_on:
+      storage:
+        condition: service_healthy

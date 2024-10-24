@@ -1,0 +1,11 @@
+#!/bin/sh -ue
+#
+# Copyright The OpenZipkin Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+
+
+build-bin/maven/maven_go_offline
+export MAVEN_OPTS="$(build-bin/maven/maven_opts)"
+# Prefetch dependencies used by zipkin-ui (NPM and NodeJS binary and dependencies of our build)
+./mvnw -q --batch-mode -nsu -pl zipkin-lens generate-resources

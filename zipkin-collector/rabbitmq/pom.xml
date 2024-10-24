@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright The OpenZipkin Authors
+    SPDX-License-Identifier: Apache-2.0
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.zipkin.zipkin2</groupId>
+    <artifactId>zipkin-collector-parent</artifactId>
+    <version>3.4.2-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>zipkin-collector-rabbitmq</artifactId>
+  <name>Collector: RabbitMQ</name>
+  <description>Zipkin span collector for RabbitMQ transport</description>
+
+  <properties>
+    <main.basedir>${project.basedir}/../..</main.basedir>
+    <amqp-client.version>5.21.0</amqp-client.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>zipkin-collector</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.rabbitmq</groupId>
+      <artifactId>amqp-client</artifactId>
+      <version>${amqp-client.version}</version>
+    </dependency>
+  </dependencies>
+</project>
