@@ -148,7 +148,6 @@ const DistraceGraph: React.FC<DistraceGraphProps> = ({
     return [];
   }, [edges, focusedNodeName]);
 
-  // These filter functions use any type because they are passed directly to untyped JS code.
   const handleObjectHighlight = useCallback(
     (highlightedObject?: any) => {
       if (!highlightedObject) {
@@ -197,12 +196,6 @@ const DistraceGraph: React.FC<DistraceGraphProps> = ({
           objectHighlighted={handleObjectHighlight}
           styles={vizStyle}
           key={
-            // Normally, when updating filters, Vizsceral will show and hide nodes without relaying
-            // them out. For a large dependency graph, this often won't let us see well the
-            // information about the filtered nodes, so we prefer to force a relayout any time we
-            // update the filter. Changing the key based on the filter like this causes react to
-            // destroy and reconstruct the component from scratch, which will have a layout zooming
-            // in on the filtered nodes.
             filter
           }
           filters={[

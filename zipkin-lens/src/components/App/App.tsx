@@ -45,13 +45,16 @@ const App: React.FC = () => {
                     <BrowserRouter basename={baseName}>
                       <Layout>
                         <Route exact path="/" component={DiscoverPage} />
+
                         {config.dependency.enabled && (
+
                           <Route
                             exact
                             path="/dependency"
                             component={DependenciesPage}
                           />
                         )}
+
                         <Route
                           exact
                           path={['/traces/:traceId', '/traceViewer']}

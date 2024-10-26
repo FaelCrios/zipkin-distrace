@@ -65,13 +65,6 @@ const Layout: React.FC = ({ children }) => {
                   path="/"
                   icon={faSearch}
                 />
-                {config.dependency.enabled && (
-                  <HeaderMenuItem
-                    title={t(`Dependencies`)}
-                    path="/dependency"
-                    icon={faProjectDiagram}
-                  />
-                )}
                 <HeaderMenuItem icon={faTable} title={t(`Distrace`)} path="/distrace" />
               </Box>
             </Box>

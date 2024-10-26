@@ -83,20 +83,20 @@ const NodeDetailDataImpl: React.FC<NodeDetailDataProps> = ({
   }[];
   if (targetEdges.length !== 0) {
     shownDataList.push({
-      title: 'Uses',
+      title: 'Utiliza de outros serviços:',
       edges: targetEdges,
       selectNodeName: (edge: Edge) => edge.target,
       formatter: (totalEdges: number) =>
-        `This service uses ${totalEdges} service${totalEdges <= 1 ? '' : 's'}`,
+        `Este serviço utiliza outro(s) ${totalEdges} serviço${totalEdges <= 1 ? '' : 's'}`,
     });
   }
   if (sourceEdges.length !== 0) {
     shownDataList.push({
-      title: 'Used',
+      title: 'Utilizado por:',
       edges: sourceEdges,
       selectNodeName: (edge: Edge) => edge.source,
       formatter: (totalEdges: number) =>
-        `This service is used by ${totalEdges} service${
+        `Este serviço é utilizado por ${totalEdges} serviço${
           totalEdges <= 1 ? '' : 's'
         }`,
     });
